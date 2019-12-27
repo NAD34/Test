@@ -1,5 +1,6 @@
 import telebot
 import pyowm
+# import requests
 from component import bot_api, weather_api
 from component import data_money, money_list
 from component import bot_movies
@@ -8,6 +9,7 @@ from component import bot_movies
 bot = telebot.TeleBot(bot_api)
 owm = pyowm.OWM(weather_api, language = 'ru')
 
+# global box2
 @bot.message_handler(commands=['start'])
 def bot_hello(message):
 	keyboard = telebot.types.InlineKeyboardMarkup()
@@ -167,12 +169,101 @@ def bot_location(callback_query: telebot.types.CallbackQuery):
     keyboard.add(location)
     bot.send_message(callback_query.from_user.id, 'Нажмите пожалуйста на кнопку для передачи своей геолокации', reply_markup=keyboard)
 
+    # bot.register_next_step_handler(log, location_help)
+    # bot.register_next_step_handler(log, location)
+
 @bot.message_handler(commands=["location"])
-def location(message):
+def location1(message):
 	keyboard = telebot.types.ReplyKeyboardMarkup(True, True)
 	location = telebot.types.KeyboardButton('Отправить местоположение', request_location=True)
 	keyboard.add(location)
 	bot.send_message(message.chat.id, 'Нажмите пожалуйста на кнопку для передачи своей геолокации', reply_markup=keyboard)
 
-
+	# bot.register_next_step_handler(log, location_help)
+	# bot.register_next_step_handler(log, location)
 bot.polling(none_stop = True, interval=2)
+'''
+@bot.message_handler(content_types=["location"])
+def location(message):
+	if message.location is not None:
+		
+		global box2
+		print(message.location)
+		mes_loc = message.location
+		lat = mes_loc.latitude
+		
+		lon = mes_loc.longitude
+		
+		box2 = list()
+		box2.append(lat)
+		box2.append(lon)
+		
+
+
+@bot.message_handler(content_types=["location"])
+def location_help(message):
+	if message.location is not None:
+		keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
+		bot_apteka = telebot.types.InlineKeyboardButton('Аптека',callback_data='/apteka')
+		bot_bankomat = telebot.types.InlineKeyboardButton('Банкоматы',callback_data='/bankomat')
+		bot_kafe = telebot.types.InlineKeyboardButton('Кафе',callback_data='/kafe')
+		keyboard.add(bot_apteka, bot_bankomat, bot_kafe)
+		bot.send_message(message.chat.id, 'Что вас интересует ?', reply_markup=keyboard)
+
+
+
+
+@bot.callback_query_handler(lambda a: a.data == '/apteka')
+def bot_location_a_1(callback_query: telebot.types.CallbackQuery):
+	global box2
+	lat = box2[0]
+	lon = box2[1]
+	google_geo = ('https://www.google.by/maps/search/Аптека+/{},{},15z'.format(lat,lon)+'/')
+	bot.send_message(callback_query.from_user.id, google_geo)
+
+@bot.message_handler(commands=['apteka'])
+def bot_location_a_2(message):
+	global box2
+	lat = box2[0]
+	lon = box2[1]
+	google_geo = ('https://www.google.by/maps/search/Аптека+/{},{},15z'.format(lat,lon)+'/')
+	bot.send_message(message.chat.id, google_geo)
+
+
+
+@bot.callback_query_handler(lambda b: b.data == '/bankomat')
+def bot_location_b_1(callback_query: telebot.types.CallbackQuery):
+	global box2
+	lat = box2[0]
+	lon = box2[1]
+	google_geo = ('https://www.google.by/maps/search/Банкоматы+/{},{},15z'.format(lat,lon)+'/')
+	bot.send_message(callback_query.from_user.id, google_geo)
+
+@bot.message_handler(commands=['bankomat'])
+def bot_location_b_2(message):
+	global box2
+	lat = box2[0]
+	lon = box2[1]
+	google_geo = ('https://www.google.by/maps/search/Банкоматы+/{},{},15z'.format(lat,lon)+'/')
+	bot.send_message(message.chat.id, google_geo)
+
+
+
+@bot.callback_query_handler(lambda k: k.data == '/kafe')
+def bot_location_k_1(callback_query: telebot.types.CallbackQuery):
+	global box2
+	lat = box2[0]
+	lon = box2[1]
+	google_geo = ('https://www.google.by/maps/search/Кафе+/{},{},15z'.format(lat,lon)+'/')
+	bot.send_message(callback_query.from_user.id, google_geo)
+
+@bot.message_handler(commands=['kafe'])
+def bot_location_k_2(message):
+	global box2
+	lat = box2[0]
+	lon = box2[1]
+	google_geo = ('https://www.google.by/maps/search/Кафе+/{},{},15z'.format(lat,lon)+'/')
+	bot.send_message(message.chat.id, google_geo)
+
+bot.polling()
+'''
